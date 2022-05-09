@@ -3,6 +3,12 @@ using BankAccounts.Helpers;
 using Microsoft.EntityFrameworkCore;
 using BankAccounts.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using BankAccounts.Interfaces;
+using BankAccounts.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +22,20 @@ builder.Services.AddIdentityCore<User>(opt => { opt.User.RequireUniqueEmail = tr
     .AddSignInManager<SignInManager<User>>()
     .AddEntityFrameworkStores<MyContext>()
     .AddDefaultTokenProviders();
-builder.Services.AddAuthentication();
+
+builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+           .AddJwtBearer(options =>
+           {
+               options.TokenValidationParameters = new TokenValidationParameters
+               {
+                   ValidateIssuerSigningKey = true,
+                   IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"])),
+                   ValidateIssuer = false,
+                   ValidateAudience = false,
+               };
+           });
 
 var app = builder.Build();
 
@@ -44,6 +63,7 @@ app.UseSwaggerUI();
 
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
+
 try
 {
     var context = services.GetRequiredService<MyContext>();

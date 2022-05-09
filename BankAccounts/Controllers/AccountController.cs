@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BankAccounts.Interfaces;
 using BankAccounts.Models;
 using BankAccounts.Models.DTOs;
 using Microsoft.AspNetCore.Http;
@@ -13,12 +14,14 @@ namespace BankAccounts.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly ITokenService _tokenService;
         private readonly IMapper _mapper;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, ITokenService tokenService, IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _tokenService = tokenService;
             _mapper = mapper;
         }
 
@@ -40,7 +43,8 @@ namespace BankAccounts.Controllers
                 {
                     Name = user.Name,
                     LastName = user.LastName,
-                    Email = user.Email
+                    Email = user.Email,
+                    Token = await _tokenService.CreateToken(user)
                 };
             }
             else
@@ -65,7 +69,8 @@ namespace BankAccounts.Controllers
                 {
                     Name = user.Name,
                     LastName = user.LastName,
-                    Email = user.Email
+                    Email = user.Email,
+                    Token = await _tokenService.CreateToken(user)
                 };
 
             }
