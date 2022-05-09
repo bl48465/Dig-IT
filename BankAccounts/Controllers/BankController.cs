@@ -24,7 +24,8 @@ namespace BankAccounts.Controllers
         [HttpPost("deposit")]
         public async Task<ActionResult<string>> Deposit(decimal amount)
         {
-            var user = await _userManager.FindByIdAsync("f74f7635-f2ef-4f3d-99fa-ce3948555f3a");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
 
             if (amount <= 0) { return BadRequest($"You can't deposit {amount} $ in your account"); }
 
@@ -50,7 +51,8 @@ namespace BankAccounts.Controllers
         [HttpPost("withdraw")]
         public async Task<ActionResult<string>> Withdraw(decimal amount)
         {
-            var user = await _userManager.FindByIdAsync("f74f7635-f2ef-4f3d-99fa-ce3948555f3a");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
 
             if (amount <= 0) { return BadRequest($"You can't withdraw {amount} $ in your account"); }
             if (amount > user.Balance) { return BadRequest("You have suffiecient funds in your account"); }
@@ -77,9 +79,10 @@ namespace BankAccounts.Controllers
         [HttpGet("balance")]
         public async Task<ActionResult<string>> CurrentBalance()
         {
-            var user = await _userManager.FindByIdAsync("f74f7635-f2ef-4f3d-99fa-ce3948555f3a");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
 
-            if(user !=null)
+            if (user !=null)
             return Ok($"Your balance is {user.Balance} $");
             else
             {
@@ -90,7 +93,9 @@ namespace BankAccounts.Controllers
         [HttpGet("history")]
         public async Task<ActionResult<string>> History()
         {
-            var user = await _userManager.FindByIdAsync("f74f7635-f2ef-4f3d-99fa-ce3948555f3a");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId);
+
             var userTransactions = _db.Transactions.Where(x => x.UserId.Equals(user.Id));
             var history = new StringBuilder();
 
@@ -101,7 +106,7 @@ namespace BankAccounts.Controllers
             }
 
             if (user != null)
-                return Ok($"Your account history: {history.ToString()}");
+                return Ok(history.ToString());
             else
             {
                 return NotFound("User not found");

@@ -80,7 +80,6 @@ namespace BankAccounts.Controllers
             }
         }
 
-
         private bool UserExists(string email)
         {
             var user = _userManager.Users.FirstOrDefault(x => x.Email == email);
